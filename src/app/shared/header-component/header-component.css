@@ -1,0 +1,28 @@
+/* MOBILE MENU */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 72px; left: 0; right: 0;
+  background: var(--white);
+  padding: 24px 32px 32px;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 999;
+  box-shadow: var(--shadow);
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: transform var(--transition), opacity var(--transition);
+}
+.mobile-menu.open {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+}
+.mobile-menu a { font-size: 1rem; color: var(--charcoal); }
+.btn-cta-mobile {
+  padding: 12px 24px;
+  background: var(--charcoal);
+  color: var(--white) !important;
+  text-align: center;
+  border-radius: 2px;
+}
