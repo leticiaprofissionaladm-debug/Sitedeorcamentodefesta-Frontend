@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 type EventType = {
   nome: string;
   icone: string;
@@ -211,11 +213,26 @@ type ItemMusicaAnimacao = {
 @Component({
   selector: 'app-orcamento',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HttpClientModule
+  ],
   templateUrl: './orcamento-component.html',
   styleUrl: './orcamento-component.css'
 })
 export class OrcamentoComponent implements OnInit {
+
+  constructor(
+    private http: HttpClient
+  ) {}
+
+  // ADICIONE AQUI
+  nomeCliente: string = '';
+  emailCliente: string = '';
+  telefoneCliente: string = '';
+
   etapaAtual = 1;
   tipoEvento = 'Casamento';
   convidados = 100;
@@ -2118,37 +2135,88 @@ export class OrcamentoComponent implements OnInit {
 
   // ← ATUALIZADO: gera numeroPedido antes de abrir o modal
   enviarOrcamento(): void {
-    this.numeroPedido = '#FP-2026-' + Math.floor(Math.random() * 90000 + 10000);
-    this.modalAberto = true;
-  }
 
-  fecharModal(): void {
-    this.modalAberto = false;
-  }
+  const dados = {
+    nomeCliente: this.nomeCliente,
+    emailCliente: this.emailCliente,
+    telefoneCliente: this.telefoneCliente,
+    tipoEvento: this.tipoEvento,
+    dataEvento: this.dataEvento,
+    numeroConvidados: this.convidados,
+    itensIds: [],
+    valorTotal: this.calcularTotal(),
+    status: "PENDENTE",
+    observacoes: ""
+  };
 
-  formatarMoeda(valor: number): string {
-    return valor.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  }
 
-  scrollCarousel(id: string, direcao: number): void {
-    const elemento = document.getElementById(id);
+  this.http.post(
+    'http://localhost:8080/api/orcamentos',
+    dados
+  ).subscribe({
 
-    if (!elemento) return;
+    next: (res) => {
+      console.log("Orçamento enviado:", res);
 
-    elemento.scrollBy({
-      left: direcao * 480,
-      behavior: 'smooth'
-    });
-  }
+      this.numeroPedido =
+        '#FP-2026-' + Math.floor(Math.random() * 90000 + 10000);
 
-  trackById(index: number, item: OrcamentoResumoItem): number | string {
-    return item.id;
-  }
+      this.modalAberto = true;
+    },
 
-  trackByNome(index: number, item: EventType | string): string {
-    return typeof item === 'string' ? item : item.nome;
-  }
+    error: (erro) => {
+      console.error("Erro ao enviar orçamento:", erro);
+    }
+
+  });
+
+}
+
+
+// cálculo do valor total
+calcularTotal(): number {
+  return 0;
+}
+
+
+fecharModal(): void {
+  this.modalAberto = false;
+}
+
+
+formatarMoeda(valor: number): string {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+}
+
+
+scrollCarousel(id: string, direcao: number): void {
+
+  const elemento = document.getElementById(id);
+
+  if (!elemento) return;
+
+  elemento.scrollBy({
+    left: direcao * 480,
+    behavior: 'smooth'
+  });
+
+}
+
+
+trackById(index: number, item: OrcamentoResumoItem): number | string {
+  return item.id;
+}
+
+
+trackByNome(index: number, item: EventType | string): string {
+
+  return typeof item === 'string'
+    ? item
+    : item.nome;
+
+}
+
 }

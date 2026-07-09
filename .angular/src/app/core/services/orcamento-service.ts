@@ -21,7 +21,7 @@ import { environment } from '../../../environments/environment';
 })
 export class OrcamentoService {
 
-  private apiUrl = `${environment.apiUrl}/orcamentos`;
+private apiUrl = `${environment.apiUrl}/api/orcamentos`;
 
   constructor(private http: HttpClient) {}
 

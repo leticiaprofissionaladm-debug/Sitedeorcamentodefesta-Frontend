@@ -2,146 +2,245 @@ import {
   Component, OnInit, AfterViewInit,
   ViewChild, ElementRef, ViewEncapsulation
 } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+
 import { AuthService } from '../../core/services/auth-service';
+import { AdminService } from '../../core/services/admin-service';
+import { CatalogoService } from '../../core/services/catalogo-service';
+import { OrcamentoService } from '../../core/services/orcamento-service';
+import { Orcamento } from '../../models/orcamento';
 
 interface Pedido {
-  num: string; client: string; event: string; date: string;
-  guests: number; value: number; status: string;
+  num: string;
+  client: string;
+  event: string;
+  date: string;
+  guests: number;
+  value: number;
+  status: string;
 }
 
+
 interface Produto {
-  name: string; cat: string; catLabel: string;
-  desc: string; price: number; required: boolean; img: string;
+  id?: number;
+  name: string;
+  cat: string;
+  catLabel: string;
+  desc: string;
+  price: number;
+  required: boolean;
+  img: string;
 }
 
 @Component({
   selector: 'app-admin',
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './admin-component.html',
-  styleUrl: './admin-component.css',
+  styleUrls: ['./admin-component.css'],
   encapsulation: ViewEncapsulation.None
 })
+  // ---- ORÇAMENTOS ----
 export class AdminComponent implements OnInit, AfterViewInit {
+
+  orcamentos: any[] = [];
 
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
 
   // ---- ESTADO GERAL ----
-  painelAtivo  = 'dashboard';
+  painelAtivo = 'dashboard';
   tituloPainel = 'Painel';
-  dataAtual    = '';
-  anoAtual     = new Date().getFullYear();
-  termoBusca   = '';
-  nomeUsuario  = 'Administrador';
+  dataAtual = '';
+  anoAtual = new Date().getFullYear();
+  termoBusca = '';
+  nomeUsuario = 'Administrador';
   inicialUsuario = 'A';
 
   bgUrl(url: string): string { return `url('${url}')`; }
 
   // ---- KPIs ----
-  kpis = [
-    { cor:'green',  valor:'12',        label:'Novos Pedidos' },
-    { cor:'yellow', valor:'5',         label:'Em Negociação' },
-    { cor:'blue',   valor:'R$ 94.800', label:'Receita do Mês' },
-    { cor:'silver', valor:'8',         label:'Eventos Confirmados' }
-  ];
+  kpis: {
+    cor: string;
+    valor: string;
+    label: string;
+
+  }[] = [
+      { cor: 'green', valor: '12', label: 'Novos Pedidos' },
+      { cor: 'yellow', valor: '5', label: 'Em Negociação' },
+      { cor: 'blue', valor: 'R$ 94.800', label: 'Receita do Mês' },
+      { cor: 'silver', valor: '8', label: 'Eventos Confirmados' }
+    ];
+
+ 
 
   // ---- PEDIDOS ----
   allOrders: Pedido[] = [
-    { num:'12345', client:'Aniversário Lucca',  event:'Infantil',  date:'15/10/2026', guests:100, value:4500,  status:'Pendente' },
-    { num:'12346', client:'Casamento Carla',    event:'Casamento', date:'01/12/2026', guests:250, value:12000, status:'Pré-Reserva' },
-    { num:'12347', client:'Carndo Silver',      event:'Temático',  date:'20/11/2026', guests:80,  value:6800,  status:'Novo' },
-    { num:'12348', client:'Debutante Sofia',    event:'15 Anos',   date:'05/11/2026', guests:120, value:8200,  status:'Confirmado' },
-    { num:'12349', client:'Rebeca & Paulo',     event:'Casamento', date:'10/01/2027', guests:180, value:15400, status:'Novo' },
-    { num:'12350', client:'Aniversário Theo',   event:'Infantil',  date:'22/10/2026', guests:60,  value:3200,  status:'Confirmado' }
+    { num: '12345', client: 'Aniversário Lucca', event: 'Infantil', date: '15/10/2026', guests: 100, value: 4500, status: 'Pendente' },
+    { num: '12346', client: 'Casamento Carla', event: 'Casamento', date: '01/12/2026', guests: 250, value: 12000, status: 'Pré-Reserva' },
+    { num: '12347', client: 'Carndo Silver', event: 'Temático', date: '20/11/2026', guests: 80, value: 6800, status: 'Novo' },
+    { num: '12348', client: 'Debutante Sofia', event: '15 Anos', date: '05/11/2026', guests: 120, value: 8200, status: 'Confirmado' },
+    { num: '12349', client: 'Rebeca & Paulo', event: 'Casamento', date: '10/01/2027', guests: 180, value: 15400, status: 'Novo' },
+    { num: '12350', client: 'Aniversário Theo', event: 'Infantil', date: '22/10/2026', guests: 60, value: 3200, status: 'Confirmado' }
   ];
-  pedidosFiltrados: Pedido[] = [];
-  get pedidosRecentes(): Pedido[] { return this.allOrders.slice(0, 3); }
-  get totalNovos(): number { return this.allOrders.filter(p => p.status === 'Novo' || p.status === 'Pendente').length; }
+pedidosFiltrados: any[] = [];
+
+get pedidosRecentes(): any[] {
+  return this.orcamentos.slice(0, 3);
+}
+
+get totalNovos(): number {
+  return this.orcamentos.filter(
+    p => p.status === 'Novo' || p.status === 'Pendente'
+  ).length;
+}
 
   // ---- MODAL ----
   modalAberto = false;
   pedidoModal: Pedido | null = null;
 
   // ---- CALENDÁRIO ----
-  diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   calYear = 2026; calMonth = 9;
 
   get mesLabel(): string { return `${this.meses[this.calMonth]} ${this.calYear}`; }
 
-  private EVENTS: Record<number,string> = {
-    2:'confirmed', 3:'confirmed', 8:'prereserva',
-    10:'prereserva', 12:'confirmed', 22:'confirmed', 23:'confirmed', 26:'prereserva'
+  private EVENTS: Record<number, string> = {
+    2: 'confirmed', 3: 'confirmed', 8: 'prereserva',
+    10: 'prereserva', 12: 'confirmed', 22: 'confirmed', 23: 'confirmed', 26: 'prereserva'
   };
 
-  cellsMini:   { num: string; cls: string }[] = [];
+  cellsMini: { num: string; cls: string }[] = [];
   cellsGrande: { num: string; cls: string; evento?: string }[] = [];
 
   proximosEventos = [
-    { day:'02', mon:'OUT', name:'Casamento Renata & Carlos', info:'Casamento · 200 conv.', cls:'confirmed' },
-    { day:'08', mon:'OUT', name:'Aniversário Lucca',         info:'Infantil · 100 conv.',  cls:'prereserva' },
-    { day:'12', mon:'OUT', name:'Casamento Carla',           info:'Casamento · 250 conv.', cls:'confirmed' },
-    { day:'22', mon:'OUT', name:'Debutante Sofia',           info:'15 Anos · 120 conv.',   cls:'confirmed' }
+    { day: '02', mon: 'OUT', name: 'Casamento Renata & Carlos', info: 'Casamento · 200 conv.', cls: 'confirmed' },
+    { day: '08', mon: 'OUT', name: 'Aniversário Lucca', info: 'Infantil · 100 conv.', cls: 'prereserva' },
+    { day: '12', mon: 'OUT', name: 'Casamento Carla', info: 'Casamento · 250 conv.', cls: 'confirmed' },
+    { day: '22', mon: 'OUT', name: 'Debutante Sofia', info: '15 Anos · 120 conv.', cls: 'confirmed' }
   ];
 
   // ---- GRÁFICOS ----
   chartData: { m: string; v: number; pct: number }[] = [];
 
   donutData = [
-    { label:'Casamento', val:35, color:'#2D2D2D' },
-    { label:'15 Anos',   val:28, color:'#C9A96E' },
-    { label:'Infantil',  val:22, color:'#9CA3AF' },
-    { label:'Temático',  val:15, color:'#E5E7EB' }
+    { label: 'Casamento', val: 35, color: '#2D2D2D' },
+    { label: '15 Anos', val: 28, color: '#C9A96E' },
+    { label: 'Infantil', val: 22, color: '#9CA3AF' },
+    { label: 'Temático', val: 15, color: '#E5E7EB' }
   ];
 
   barReport = [
-    { label:'Casamento', val:'R$ 99k', pct:100, color:'#2D2D2D' },
-    { label:'15 Anos',   val:'R$ 79k', pct:80,  color:'#C9A96E' },
-    { label:'Infantil',  val:'R$ 62k', pct:63,  color:'#9CA3AF' },
-    { label:'Temático',  val:'R$ 42k', pct:43,  color:'#E5E7EB' }
+    { label: 'Casamento', val: 'R$ 99k', pct: 100, color: '#2D2D2D' },
+    { label: '15 Anos', val: 'R$ 79k', pct: 80, color: '#C9A96E' },
+    { label: 'Infantil', val: 'R$ 62k', pct: 63, color: '#9CA3AF' },
+    { label: 'Temático', val: 'R$ 42k', pct: 43, color: '#E5E7EB' }
   ];
 
   // ---- CATÁLOGO ----
   filtrosCat = [
-    { val:'all', label:'Todos' }, { val:'buffet', label:'Buffet' },
-    { val:'bolo', label:'Bolo' }, { val:'decor', label:'Decoração' }, { val:'musica', label:'Música' }
+    { val: 'all', label: 'Todos' }, { val: 'buffet', label: 'Buffet' },
+    { val: 'bolo', label: 'Bolo' }, { val: 'decor', label: 'Decoração' }, { val: 'musica', label: 'Música' }
   ];
   filtroCatAtivo = 'all';
 
   allProducts: Produto[] = [
-    { name:'Buffet Básico',    cat:'buffet', catLabel:'Buffet',     desc:'Salgados, frios e pratos quentes', price:2500, required:true,  img:'https://images.unsplash.com/photo-1555244162-803834f70033?w=400&q=80' },
-    { name:'Buffet Premium',   cat:'buffet', catLabel:'Buffet',     desc:'Gourmet com estações ao vivo',     price:4200, required:false, img:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80' },
-    { name:'Bolo 3 Andares',   cat:'bolo',   catLabel:'Bolo',       desc:'Pasta americana.',                 price:1200, required:false, img:'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=400&q=80' },
-    { name:'Mesa de Doces',    cat:'bolo',   catLabel:'Bolo',       desc:'Brigadeiros, trufas e bem-casados',price:680,  required:false, img:'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80' },
-    { name:'Decoração Floral', cat:'decor',  catLabel:'Decoração',  desc:'Arranjos completos.',               price:4800, required:true,  img:'https://images.unsplash.com/photo-1490750967868-88df5691cc3b?w=400&q=80' },
-    { name:'DJ Profissional',  cat:'musica', catLabel:'Música',     desc:'6 horas de música.',               price:800,  required:false, img:'https://images.unsplash.com/photo-1571266752461-eff34b1f01cd?w=400&q=80' }
+    { name: 'Buffet Básico', cat: 'buffet', catLabel: 'Buffet', desc: 'Salgados, frios e pratos quentes', price: 2500, required: true, img: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=400&q=80' },
+    { name: 'Buffet Premium', cat: 'buffet', catLabel: 'Buffet', desc: 'Gourmet com estações ao vivo', price: 4200, required: false, img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80' },
+    { name: 'Bolo 3 Andares', cat: 'bolo', catLabel: 'Bolo', desc: 'Pasta americana.', price: 1200, required: false, img: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=400&q=80' },
+    { name: 'Mesa de Doces', cat: 'bolo', catLabel: 'Bolo', desc: 'Brigadeiros, trufas e bem-casados', price: 680, required: false, img: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80' },
+    { name: 'Decoração Floral', cat: 'decor', catLabel: 'Decoração', desc: 'Arranjos completos.', price: 4800, required: true, img: 'https://images.unsplash.com/photo-1490750967868-88df5691cc3b?w=400&q=80' },
+    { name: 'DJ Profissional', cat: 'musica', catLabel: 'Música', desc: '6 horas de música.', price: 800, required: false, img: 'https://images.unsplash.com/photo-1571266752461-eff34b1f01cd?w=400&q=80' }
   ];
   produtosFiltrados: Produto[] = [];
 
   // ---- CADASTRO ----
-  novoProd = { nome:'', categoria:'Buffet', preco:0, tipo:'opcional', desc:'' };
+  novoProd = {
+    nome: '',
+    categoria: 'Buffet',
+    preco: 0,
+    tipo: 'opcional',
+    desc: ''
+  };
+
   prodSalvo = false;
+// KPIs do Dashboard
 
-  constructor(private authService: AuthService, private router: Router) {}
+constructor(
+  private authService: AuthService,
+  private adminService: AdminService,
+  private router: Router,
+  private catalogoService: CatalogoService,
+  private orcamentoService: OrcamentoService
+) {}
 
-  ngOnInit(): void {
-    // Data
-    const d = new Date();
-    this.dataAtual = d.toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+ngOnInit(): void {
 
-    // Usuário
-    const u = this.authService.getUsuario();
-    if (u?.nome) { this.nomeUsuario = u.nome; this.inicialUsuario = u.nome[0].toUpperCase(); }
+  const d = new Date();
 
-    // Init dados
-    this.pedidosFiltrados = [...this.allOrders];
-    this.produtosFiltrados = [...this.allProducts];
-    this.gerarCalendario();
-    this.gerarGrafico();
-  }
+  this.dataAtual = d.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
+  // Busca KPIs
+  this.adminService.buscarKpis().subscribe({
+    next: (kpi) => {
+      // seu código dos KPIs
+    },
+    error: (erro: any) => {
+      console.error('Erro ao carregar KPIs:', erro);
+    }
+  });
+
+
+  // Carrega orçamentos do banco
+  this.carregarOrcamentos();
+
+  this.pedidosFiltrados = [...this.allOrders];
+  this.produtosFiltrados = [...this.allProducts];
+
+  this.carregarCatalogo();
+  this.gerarCalendario();
+  this.gerarGrafico();
+
+} // <-- fecha o ngOnInit aqui
+
+
+
+// FORA do ngOnInit
+carregarOrcamentos(): void {
+
+  this.orcamentoService.listarTodos().subscribe({
+    next: (dados) => {
+
+      this.orcamentos = dados.map((o: any) => ({
+        id: o.id,
+        num: o.id,
+        client: o.nomeCliente,
+        event: o.tipoEvento,
+        date: o.dataEvento,
+        guests: o.numeroConvidados,
+        value: o.valorTotal,
+        status: o.status
+      }));
+
+      this.pedidosFiltrados = [...this.orcamentos];
+
+      console.log('Orçamentos carregados:', this.orcamentos);
+
+    },
+
+    error: (erro) => {
+      console.error('Erro ao carregar orçamentos:', erro);
+    }
+  });
+
+}
   ngAfterViewInit(): void {
     setTimeout(() => this.desenharDonut(), 200);
   }
@@ -150,20 +249,20 @@ export class AdminComponent implements OnInit, AfterViewInit {
   showPanel(id: string): void {
     this.painelAtivo = id;
     const titulos: Record<string, string> = {
-      dashboard:'Painel', pedidos:'Pedidos', agenda:'Agenda',
-      catalogo:'Catálogo', cadastro:'Novo Produto',
-      relatorios:'Relatórios', configuracoes:'Configurações'
+      dashboard: 'Painel', pedidos: 'Pedidos', agenda: 'Agenda',
+      catalogo: 'Catálogo', cadastro: 'Novo Produto',
+      relatorios: 'Relatórios', configuracoes: 'Configurações'
     };
     this.tituloPainel = titulos[id] || id;
     if (id === 'dashboard') setTimeout(() => this.desenharDonut(), 100);
-    if (id === 'agenda')    this.gerarCalendarioGrande();
+    if (id === 'agenda') this.gerarCalendarioGrande();
   }
 
   // ---- PEDIDOS ----
   statusClass(s: string): string {
-    const m: Record<string,string> = {
-      'Novo':'new', 'Pendente':'pending', 'Pré-Reserva':'prereserva',
-      'Confirmado':'confirmed', 'Rejeitado':'rejected'
+    const m: Record<string, string> = {
+      'Novo': 'new', 'Pendente': 'pending', 'Pré-Reserva': 'prereserva',
+      'Confirmado': 'confirmed', 'Rejeitado': 'rejected'
     };
     return m[s] || 'pending';
   }
@@ -191,7 +290,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const first = new Date(this.calYear, this.calMonth, 1).getDay();
     const total = new Date(this.calYear, this.calMonth + 1, 0).getDate();
     this.cellsMini = [];
-    for (let i = 0; i < first; i++) this.cellsMini.push({ num:'', cls:'empty' });
+    for (let i = 0; i < first; i++) this.cellsMini.push({ num: '', cls: 'empty' });
     for (let d = 1; d <= total; d++) {
       const isToday = d === today.getDate() && this.calMonth === today.getMonth() && this.calYear === today.getFullYear();
       const evCls = this.EVENTS[d] || '';
@@ -203,7 +302,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     const today = new Date();
     const first = new Date(2026, 9, 1).getDay();
     this.cellsGrande = [];
-    for (let i = 0; i < first; i++) this.cellsGrande.push({ num:'', cls:'empty' });
+    for (let i = 0; i < first; i++) this.cellsGrande.push({ num: '', cls: 'empty' });
     for (let d = 1; d <= 31; d++) {
       const evCls = this.EVENTS[d] || '';
       const isToday = d === today.getDate() && today.getMonth() === 9 && today.getFullYear() === 2026 ? 'today' : '';
@@ -215,14 +314,14 @@ export class AdminComponent implements OnInit, AfterViewInit {
   changeMonth(dir: number): void {
     this.calMonth += dir;
     if (this.calMonth > 11) { this.calMonth = 0; this.calYear++; }
-    if (this.calMonth < 0)  { this.calMonth = 11; this.calYear--; }
+    if (this.calMonth < 0) { this.calMonth = 11; this.calYear--; }
     this.gerarCalendario();
   }
 
   // ---- GRÁFICO DE BARRAS ----
   gerarGrafico(): void {
-    const dados = [9200,11400,8700,14200,12800,15600,13900,16200,11700,15800,0,0];
-    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const dados = [9200, 11400, 8700, 14200, 12800, 15600, 13900, 16200, 11700, 15800, 0, 0];
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const max = Math.max(...dados);
     this.chartData = dados.map((v, i) => ({ m: meses[i], v, pct: v ? v / max * 100 : 2 }));
   }
@@ -264,34 +363,94 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   // ---- CADASTRO ----
   updatePreview(): void { /* reactive via ngModel */ }
+  carregarCatalogo(): void {
 
-  saveProduct(): void {
-    if (!this.novoProd.nome) return;
-    this.allProducts.unshift({
-      name: this.novoProd.nome, cat: this.novoProd.categoria.toLowerCase(),
-      catLabel: this.novoProd.categoria, desc: this.novoProd.desc,
-      price: this.novoProd.preco, required: this.novoProd.tipo === 'obrigatorio',
-      img: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=400&q=80'
+    this.catalogoService.listarTodos().subscribe({
+
+      next: (dados) => {
+
+        const produtosBanco: Produto[] = dados.map(item => ({
+          id: item.id,
+          name: item.nome,
+          cat: item.categoria?.toLowerCase() || '',
+          catLabel: item.categoria,
+          desc: item.descricao,
+          price: item.preco,
+          required: item.obrigatorio ?? false,
+          img: item.imagemUrl || ''
+        }));
+
+        // mantém os produtos da tela + adiciona os do banco
+        this.allProducts = [
+          ...this.allProducts,
+          ...produtosBanco
+        ];
+
+        this.produtosFiltrados = [...this.allProducts];
+
+      },
+
+      error: (erro) => {
+        console.error('Erro ao carregar catálogo:', erro);
+      }
+
     });
-    this.prodSalvo = true;
-    setTimeout(() => { this.prodSalvo = false; this.clearForm(); }, 3000);
-  }
 
+  }
+  saveProduct(): void {
+
+    console.log('ENTROU NO SAVE');
+
+    if (!this.novoProd.nome) {
+      console.log('Nome vazio');
+      return;
+    }
+
+    const produto = {
+      nome: this.novoProd.nome,
+      descricao: this.novoProd.desc,
+      preco: this.novoProd.preco,
+      categoria: this.novoProd.categoria,
+      obrigatorio: this.novoProd.tipo === 'obrigatorio',
+      ativo: true,
+      imagemUrl: ''
+    };
+
+    console.log('Enviando:', produto);
+
+    this.catalogoService.criar(produto).subscribe({
+      next: (res) => {
+        console.log('SALVOU:', res);
+
+        this.prodSalvo = true;
+        this.carregarCatalogo();
+
+        setTimeout(() => {
+          this.prodSalvo = false;
+          this.clearForm();
+        }, 3000);
+      },
+
+      error: (erro) => {
+        console.error('ERRO API:', erro);
+      }
+    });
+  }
   clearForm(): void {
-    this.novoProd = { nome:'', categoria:'Buffet', preco:0, tipo:'opcional', desc:'' };
+    this.novoProd = { nome: '', categoria: 'Buffet', preco: 0, tipo: 'opcional', desc: '' };
   }
 
   // ---- AUTH ----
   logout(): void { this.authService.logout(); this.router.navigate(['/login']); }
 
   // ---- NAVEGAÇÃO HOME (LOGO) ----
-voltarHome(): void {
-  this.painelAtivo = 'dashboard'; // volta para tela inicial
-  this.tituloPainel = 'Painel';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  voltarHome(): void {
+    this.painelAtivo = 'dashboard'; // volta para tela inicial
+    this.tituloPainel = 'Painel';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // opcional: garante URL limpa
-  this.router.navigate(['/home']);
-}
+    // opcional: garante URL limpa
+    this.router.navigate(['/home']);
+  }
 
 }
