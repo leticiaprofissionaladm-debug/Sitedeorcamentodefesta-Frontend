@@ -11,11 +11,11 @@
    HERO
 =========================== */
 .hero-atendimento{
+    position: relative;   /* NOVO */
     height:420px;
-    overflow: hidden;   /* adicione essa linha */
+    overflow: hidden;     /* NOVO — trava qualquer vazamento */
 
     background-image: url('/assets/img/fotoparaatendimento.png');
-
     background-size: cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -24,7 +24,11 @@
     justify-content:center;
     align-items:center;
 }
+
 .hero-overlay {
+  position: absolute;   /* NOVO — gruda nas bordas do pai */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 
@@ -41,8 +45,7 @@
   color: white;
 
   padding: 0 30px;
-
-  transform: translateY(-230px);
+  /* removido: transform: translateY(-230px); */
 }
 
 .eyebrow {
@@ -91,6 +94,7 @@
   border-radius: 24px;
   padding: 40px;
   text-align: center;
+  border: 1px solid rgba(0, 0, 0, .12);   /* NOVO — borda escura sutil */
 
   box-shadow: 0 15px 40px rgba(0, 0, 0, .08);
 
