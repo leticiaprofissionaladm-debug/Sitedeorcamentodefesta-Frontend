@@ -24,6 +24,13 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+  path: 'mensagens',
+  loadComponent: () =>
+import('./pages/mensagens/mensagens')
+        .then(m => m.MensagensComponent)
+
+  },
+  {
     path: 'home',
     loadComponent: () =>
       import('./pages/home-component/home-component').then(m => m.HomeComponent)

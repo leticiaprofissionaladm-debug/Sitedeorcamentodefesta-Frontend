@@ -2064,6 +2064,7 @@ export class OrcamentoComponent implements OnInit {
     for (const bebida of this.bebidasAtivas()) {
       this.quantidadesBebidas[bebida.id] = 0;
     }
+    
   }
 
   private inicializarEstadoDecoracao(): void {
@@ -2134,7 +2135,9 @@ export class OrcamentoComponent implements OnInit {
   }
 
   // ← ATUALIZADO: gera numeroPedido antes de abrir o modal
-  enviarOrcamento(): void {
+ enviarOrcamento(): void {
+
+  console.log("CLIQUE FUNCIONOU");
 
   const dados = {
     nomeCliente: this.nomeCliente,
@@ -2149,6 +2152,8 @@ export class OrcamentoComponent implements OnInit {
     observacoes: ""
   };
 
+  console.log(dados);
+
 
   this.http.post(
     'http://localhost:8080/api/orcamentos',
@@ -2156,7 +2161,7 @@ export class OrcamentoComponent implements OnInit {
   ).subscribe({
 
     next: (res) => {
-      console.log("Orçamento enviado:", res);
+      console.log("Resposta:", res);
 
       this.numeroPedido =
         '#FP-2026-' + Math.floor(Math.random() * 90000 + 10000);
@@ -2165,7 +2170,8 @@ export class OrcamentoComponent implements OnInit {
     },
 
     error: (erro) => {
-      console.error("Erro ao enviar orçamento:", erro);
+      console.error(erro);
+      alert("Erro ao enviar orçamento.");
     }
 
   });
@@ -2175,9 +2181,8 @@ export class OrcamentoComponent implements OnInit {
 
 // cálculo do valor total
 calcularTotal(): number {
-  return 0;
+  return this.total;
 }
-
 
 fecharModal(): void {
   this.modalAberto = false;
@@ -2218,5 +2223,19 @@ trackByNome(index: number, item: EventType | string): string {
     : item.nome;
 
 }
+// COLE AQUI
+abrirWhatsapp(): void {
 
+  const telefone = '5521969252477';
+
+  const mensagem = encodeURIComponent(
+    'Olá! Gostaria de um orçamento na Festa Planner.'
+  );
+
+  window.open(
+    `https://wa.me/${telefone}?text=${mensagem}`,
+    '_blank'
+  );
 }
+
+} // <- fecha a classe

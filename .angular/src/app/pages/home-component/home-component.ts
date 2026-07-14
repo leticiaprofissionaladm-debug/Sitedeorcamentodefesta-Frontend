@@ -110,12 +110,32 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.menuAberto = false;
     document.body.style.overflow = '';
   }
+shiftTemas(dir: number): void {
+  const track = this.temasTrack?.nativeElement;
+  if (!track) return;
 
-  shiftTemas(dir: number): void {
-    const track = this.temasTrack?.nativeElement;
-    if (!track) return;
-    const max = track.scrollWidth - (track.parentElement?.offsetWidth || 0);
-    this.temasOffset = Math.max(0, Math.min(this.temasOffset + dir * 280 * 2, max));
-    track.style.transform = `translateX(-${this.temasOffset}px)`;
-  }
+  const max = track.scrollWidth - (track.parentElement?.offsetWidth || 0);
+  this.temasOffset = Math.max(
+    0,
+    Math.min(this.temasOffset + dir * 280 * 2, max)
+  );
+
+  track.style.transform = `translateX(-${this.temasOffset}px)`;
 }
+
+// COLE AQUI
+abrirWhatsapp(): void {
+
+  const telefone = '5521969252477';
+
+  const mensagem = encodeURIComponent(
+    'Olá! Gostaria de um orçamento na Festa Planner.'
+  );
+
+  window.open(
+    `https://wa.me/${telefone}?text=${mensagem}`,
+    '_blank'
+  );
+}
+
+} // <- fecha a classe

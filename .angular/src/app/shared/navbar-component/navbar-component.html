@@ -35,10 +35,12 @@
       </a>
     </li>
     <li>
-      <a href="#" routerLinkActive="active">
-        Mensagens
-      </a>
-    </li>
+  <button
+  routerLink="/mensagens"
+  style="background:#8b5cf6;color:white;padding:10px;cursor:pointer">
+  💬 Mensagens
+</button>
+</li>
     <li>
       <a href="#" routerLinkActive="active">
         Conta
@@ -66,6 +68,10 @@
   <a routerLink="/home"      (click)="fecharMenu()">Início</a>
   <a routerLink="/orcamento" (click)="fecharMenu()">Meus Orçamentos</a>
   <a routerLink="/catalogo"  (click)="fecharMenu()">Catálogo</a>
-  <a href="#"                (click)="fecharMenu()">Mensagens</a>
+<a
+  routerLink="/mensagens"
+  (click)="fecharMenu()">
+  Mensagens
+</a>
   <a routerLink="/orcamento" class="btn-cta-mobile" (click)="fecharMenu()">Orçamento</a>
 </div>

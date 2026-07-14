@@ -7,7 +7,11 @@
   <ul class="nav-links">
     <li><a routerLink="/home">Início</a></li>
     <li><a routerLink="/orcamento" class="active">Meus Orçamentos</a></li>
-    <li><a href="#">Mensagens</a></li>
+  <li>
+  <a (click)="abrirWhatsapp()" style="cursor: pointer;">
+    Mensagens
+  </a>
+</li>
     <li><a href="#">Conta</a></li>
   </ul>
   <a routerLink="/login" class="btn-adm">Área ADM</a>
@@ -1079,17 +1083,14 @@
   </div>
 
 </section>
-
-<!-- MODAL DE SUCESSO -->
 <div class="modal-overlay" [class.open]="modalAberto">
   <div class="modal">
-    <span class="modal-icon">✦</span>
     <h3>Orçamento Enviado!</h3>
-    <p>Recebemos sua solicitação. A casa de festas entrará em contato em até 24 horas para confirmar a disponibilidade de data e os detalhes do evento.</p>
-    @if (numeroPedido) {
-      <p class="modal-ref"><strong>Nº do pedido: {{ numeroPedido }}</strong></p>
-    }
-    <br />
-    <a routerLink="/home" class="btn-next" style="display:inline-block">Voltar ao início</a>
+
+    <p>Nº do pedido: {{ numeroPedido }}</p>
+
+    <button class="btn-next" (click)="modalAberto = false">
+      Fechar
+    </button>
   </div>
 </div>

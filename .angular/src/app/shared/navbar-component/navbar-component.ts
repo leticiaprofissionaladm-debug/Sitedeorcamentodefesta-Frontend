@@ -20,6 +20,7 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './navbar-component.html',
   styleUrl: './navbar-component.css'
@@ -71,4 +72,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   onEscape(): void {
     if (this.menuAberto) this.fecharMenu();
   }
+abrirWhatsapp(): void {
+  const telefone = '5521969252477';
+
+  const mensagem = encodeURIComponent(
+    'Olá! Gostaria de um orçamento na Festa Planner.'
+  );
+
+  window.open(
+    `https://wa.me/${telefone}?text=${mensagem}`,
+    '_blank'
+  );
+}
 }
