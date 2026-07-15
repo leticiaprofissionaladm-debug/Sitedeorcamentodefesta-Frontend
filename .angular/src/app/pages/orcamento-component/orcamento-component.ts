@@ -2161,13 +2161,15 @@ export class OrcamentoComponent implements OnInit {
   ).subscribe({
 
     next: (res) => {
-      console.log("Resposta:", res);
+  console.log("Resposta:", res);
 
-      this.numeroPedido =
-        '#FP-2026-' + Math.floor(Math.random() * 90000 + 10000);
+  this.numeroPedido =
+    '#FP-2026-' + Math.floor(Math.random() * 90000 + 10000);
 
-      this.modalAberto = true;
-    },
+  this.modalAberto = true;
+
+  console.log("modalAberto:", this.modalAberto);
+},
 
     error: (erro) => {
       console.error(erro);
