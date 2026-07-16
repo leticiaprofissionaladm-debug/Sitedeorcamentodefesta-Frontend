@@ -52,6 +52,12 @@ import('./pages/mensagens/mensagens')
       import('./pages/login-component/login-component').then(m => m.LoginComponent)
   },
   {
+ path: 'conta',
+ loadComponent: () =>
+ import('./pages/conta/conta.component')
+ .then(m => m.ContaComponent)
+},
+  {
     path: 'admin',
     canActivate: [authGuard],
     loadComponent: () =>

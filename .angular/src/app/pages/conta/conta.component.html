@@ -1,0 +1,29 @@
+<h1>Minha Conta</h1>
+
+<div *ngIf="cliente">
+
+  <h2>{{ cliente.nome }}</h2>
+
+  <p>Email: {{ cliente.email }}</p>
+
+  <p>Telefone: {{ cliente.telefone }}</p>
+
+</div>
+
+<hr>
+
+<h2>Meus Orçamentos</h2>
+
+<div *ngFor="let orcamento of orcamentos">
+
+  <p><strong>Pedido:</strong> #{{ orcamento.id }}</p>
+
+  <p><strong>Evento:</strong> {{ orcamento.tipoEvento }}</p>
+
+  <p><strong>Valor:</strong> R$ {{ orcamento.valorTotal }}</p>
+
+  <p><strong>Status:</strong> {{ orcamento.status }}</p>
+
+  <hr>
+
+</div>

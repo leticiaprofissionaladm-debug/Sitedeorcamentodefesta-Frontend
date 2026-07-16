@@ -21,8 +21,7 @@ import { environment } from '../../../environments/environment';
 })
 export class OrcamentoService {
 
-private apiUrl = `${environment.apiUrl}/api/orcamentos`;
-
+private apiUrl = `${environment.apiUrl}/orcamentos`;
   constructor(private http: HttpClient) {}
 
   /**
@@ -82,6 +81,13 @@ private apiUrl = `${environment.apiUrl}/api/orcamentos`;
    * @param id - ID do orçamento a remover
    */
   remover(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
+  return this.http.delete<void>(`${this.apiUrl}/${id}`);
+}
+
+/**
+ * Busca todos os orçamentos de um cliente pelo e-mail
+ */
+buscarPorEmail(email: string): Observable<Orcamento[]> {
+  return this.http.get<Orcamento[]>(`${this.apiUrl}/cliente/${email}`);
+}
 }

@@ -134,7 +134,7 @@
   border: none;
   border-radius: 12px;
 
-  background: #222;
+  background: #caa45d;
   color: white;
 
   font-size: 17px;
@@ -146,11 +146,11 @@
 }
 
 .card button:hover {
-  background: #caa45d;
+  background: #222;
 }
 
 .btn-whatsapp {
-  background: #222 !important;
+  background: #caa45d!important;
 }
 
 .btn-whatsapp:hover {
