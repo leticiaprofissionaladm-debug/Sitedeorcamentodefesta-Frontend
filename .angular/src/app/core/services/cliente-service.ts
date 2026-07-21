@@ -13,26 +13,35 @@ import {
 })
 export class ContaService {
 
-  // Precisa bater exatamente com @RequestMapping("/api/conta") do ContaController
-  private apiUrl = 'http://localhost:8081/api/conta';
+  private apiUrl = 'http://localhost:8080/api/clientes';
 
   constructor(
     private http: HttpClient
   ) {}
 
   buscarCliente(id: number): Observable<Cliente> {
-    return this.http.get<Cliente>(`${this.apiUrl}/cliente/${id}`);
+    return this.http.get<Cliente>(
+      `${this.apiUrl}/${id}`
+    );
   }
 
   listarOrcamentos(id: number): Observable<OrcamentoResumo[]> {
-    return this.http.get<OrcamentoResumo[]>(`${this.apiUrl}/cliente/${id}/orcamentos`);
+    return this.http.get<OrcamentoResumo[]>(
+      `${this.apiUrl}/${id}/orcamentos`
+    );
   }
 
   atualizarConta(id: number, dados: Partial<Cliente>): Observable<Cliente> {
-    return this.http.put<Cliente>(`${this.apiUrl}/cliente/${id}`, dados);
+    return this.http.put<Cliente>(
+      `${this.apiUrl}/${id}`,
+      dados
+    );
   }
 
   alterarSenha(id: number, dados: AlterarSenha): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/cliente/${id}/senha`, dados);
+    return this.http.put<void>(
+      `${this.apiUrl}/${id}/senha`,
+      dados
+    );
   }
 }

@@ -1,29 +1,216 @@
-<h1>Minha Conta</h1>
+<div class="conta-page" *ngIf="!carregando; else loading">
 
-<div *ngIf="cliente">
+  <!-- CABEÇALHO -->
+  <header class="cabecalho">
 
-  <h2>{{ cliente.nome }}</h2>
+    <div class="avatar" aria-hidden="true">
+      {{ (cliente?.nome ?? '?').charAt(0) }}
+    </div>
 
-  <p>Email: {{ cliente.email }}</p>
+    <div class="cabecalho-texto">
+      <span class="eyebrow">Minha conta</span>
+      <h1>{{ cliente?.nome ?? 'Sua conta' }}</h1>
+      <p>Gerencie seus dados pessoais e acompanhe o andamento dos seus orçamentos.</p>
+    </div>
 
-  <p>Telefone: {{ cliente.telefone }}</p>
+  </header>
+
+  <!-- ALERTAS -->
+  <div class="alert sucesso" *ngIf="mensagemSucesso" role="status">
+    <span class="alert-icone">✓</span>
+    {{ mensagemSucesso }}
+  </div>
+
+  <div class="alert erro" *ngIf="erro" role="alert">
+    <span class="alert-icone">!</span>
+    {{ erro }}
+  </div>
+
+  <div class="grid-principal">
+
+    <!-- DADOS PESSOAIS -->
+    <section class="card">
+
+      <div class="titulo-card">
+        <h2>Dados pessoais</h2>
+        <button
+          type="button"
+          class="btn-texto"
+          *ngIf="!editando"
+          (click)="ativarEdicao()">
+          Editar
+        </button>
+      </div>
+
+      <dl class="dados" *ngIf="!editando">
+
+        <div class="dado-item">
+          <dt>Nome</dt>
+          <dd>{{ cliente?.nome }}</dd>
+        </div>
+
+        <div class="dado-item">
+          <dt>E-mail</dt>
+          <dd>{{ cliente?.email }}</dd>
+        </div>
+
+        <div class="dado-item">
+          <dt>Telefone</dt>
+          <dd>{{ cliente?.telefone }}</dd>
+        </div>
+
+        <div class="dado-item">
+          <dt>Endereço</dt>
+          <dd>{{ cliente?.endereco }}</dd>
+        </div>
+
+        <div class="dado-item" *ngIf="cliente?.dataCadastro">
+          <dt>Cliente desde</dt>
+          <dd>{{ cliente?.dataCadastro | date:'dd/MM/yyyy' }}</dd>
+        </div>
+
+      </dl>
+
+      <form class="formulario" *ngIf="editando" (ngSubmit)="salvarDados()">
+
+        <label>
+          Nome
+          <input type="text" name="nome" [(ngModel)]="formDados.nome" required>
+        </label>
+
+        <label>
+          E-mail
+          <input type="email" name="email" [(ngModel)]="formDados.email" required>
+        </label>
+
+        <label>
+          Telefone
+          <input type="text" name="telefone" [(ngModel)]="formDados.telefone" required>
+        </label>
+
+        <label>
+          Endereço
+          <input type="text" name="endereco" [(ngModel)]="formDados.endereco" required>
+        </label>
+
+        <div class="botoes">
+          <button type="submit" class="btn-primario" [disabled]="salvandoDados">
+            {{ salvandoDados ? 'Salvando...' : 'Salvar alterações' }}
+          </button>
+          <button type="button" class="btn-secundario" (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </section>
+
+    <!-- SEGURANÇA -->
+    <section class="card">
+
+      <div class="titulo-card">
+        <h2>Segurança</h2>
+        <button
+          type="button"
+          class="btn-texto"
+          *ngIf="!mostrarFormSenha"
+          (click)="mostrarFormSenha = true">
+          Alterar senha
+        </button>
+      </div>
+
+      <p class="texto-suporte" *ngIf="!mostrarFormSenha">
+        Sua senha protege o acesso aos seus dados e orçamentos. Recomendamos alterá-la periodicamente.
+      </p>
+
+      <form class="formulario" *ngIf="mostrarFormSenha" (ngSubmit)="salvarNovaSenha()">
+
+        <label>
+          Senha atual
+          <input type="password" name="senhaAtual" [(ngModel)]="formSenha.senhaAtual" required>
+        </label>
+
+        <label>
+          Nova senha
+          <input type="password" name="novaSenha" [(ngModel)]="formSenha.novaSenha" required>
+        </label>
+
+        <label>
+          Confirmar nova senha
+          <input type="password" name="confirmarSenha" [(ngModel)]="formSenha.confirmarSenha" required>
+        </label>
+
+        <p class="mensagem-erro" *ngIf="erroSenha">{{ erroSenha }}</p>
+
+        <div class="botoes">
+          <button type="submit" class="btn-primario" [disabled]="salvandoSenha">
+            {{ salvandoSenha ? 'Salvando...' : 'Salvar nova senha' }}
+          </button>
+          <button
+            type="button"
+            class="btn-secundario"
+            (click)="mostrarFormSenha = false; erroSenha=''">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+  <!-- ORÇAMENTOS -->
+  <section class="card card-orcamentos">
+
+    <div class="titulo-card">
+      <h2>Meus orçamentos</h2>
+      <span class="contagem" *ngIf="orcamentos.length > 0">
+        {{ orcamentos.length }} {{ orcamentos.length === 1 ? 'orçamento' : 'orçamentos' }}
+      </span>
+    </div>
+
+    <div class="tabela-wrapper" *ngIf="orcamentos.length > 0">
+      <table>
+
+        <thead>
+          <tr>
+            <th>Evento</th>
+            <th>Data da festa</th>
+            <th>Status</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let orc of orcamentos">
+            <td class="celula-principal">{{ orc.tipoFesta }}</td>
+            <td>{{ orc.dataFesta | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span [ngClass]="statusClasse(orc.status)">
+                {{ orc.status }}
+              </span>
+            </td>
+            <td class="celula-valor">{{ orc.valorEstimado | currency:'BRL' }}</td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+    <div class="estado-vazio" *ngIf="orcamentos.length === 0">
+      <p>Você ainda não tem orçamentos.</p>
+      <span>Quando solicitar um orçamento de festa, ele aparecerá aqui.</span>
+    </div>
+
+  </section>
 
 </div>
 
-<hr>
-
-<h2>Meus Orçamentos</h2>
-
-<div *ngFor="let orcamento of orcamentos">
-
-  <p><strong>Pedido:</strong> #{{ orcamento.id }}</p>
-
-  <p><strong>Evento:</strong> {{ orcamento.tipoEvento }}</p>
-
-  <p><strong>Valor:</strong> R$ {{ orcamento.valorTotal }}</p>
-
-  <p><strong>Status:</strong> {{ orcamento.status }}</p>
-
-  <hr>
-
-</div>
+<ng-template #loading>
+  <div class="tela-carregando">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Carregando sua conta...</p>
+  </div>
+</ng-template>
